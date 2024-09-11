@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects</title>
+</head>
+
+<body>
+    <h1>Projects</h1>
+
+    <!-- Form to Add New Project -->
+    <form action="/projects" method="POST">
+        <label for="name">Project Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="base_addr">Base Address:</label>
+        <input type="text" id="base_addr" name="base_addr" required>
+        <button type="submit">Add Project</button>
+    </form>
+
+    <form id="applyForm" action="/projects/apply" method="POST">
+        <button type="submit">Apply Projects</button>
+    </form>
+
+    <!-- List of Projects -->
+
+    <!-- List of Projects -->
+    <h2>Project List</h2>
+    <ul>
+        {{ range .Projects }}
+        <li>
+            <strong>{{ .Name }}</strong> ({{ .BaseAddr }})
+            <!-- Add View Button to Link to Project's Details -->
+            <a href="/projects/{{ .ID }}">View</a>
+            <!-- Optionally add a Delete button -->
+            <a href="/projects/delete/{{ .ID }}">Delete</a>
+        </li>
+        {{ else }}
+        <p>No projects available. Add a new project!</p>
+        {{ end }}
+    </ul>
+</body>
+
+</html>

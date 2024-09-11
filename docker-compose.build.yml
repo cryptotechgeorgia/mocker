@@ -1,0 +1,11 @@
+version: "3.4"
+services:
+  mocker:
+    image: ${DOCKER_REGISTRY_COINET}/mocker
+    environment:
+      - TZ=Asia/Tbilisi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7006:8080"

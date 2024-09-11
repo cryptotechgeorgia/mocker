@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            width: 45%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+        }
+
+        textarea,
+        input,
+        select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .payload-table-container {
+            margin-bottom: 20px;
+        }
+
+        .payload-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .payload-table th,
+        .payload-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .payload-table th {
+            background-color: #f2f2f2;
+        }
+
+        .expandable {
+            cursor: pointer;
+        }
+
+        .payload-details {
+            display: none;
+        }
+
+        .payload-button {
+            padding: 8px 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .payload-button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-button {
+            padding: 8px 12px;
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+
+        /* .pair {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+
+        .pair h4 {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .details {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .details textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .expandable {
+            cursor: pointer;
+        } */
+    </style>
+</head>
+
+<body>
+
+    <h1>Request Details</h1>
+
+    <!-- Display request details -->
+    <div class="section">
+        <h3>Request Details</h3>
+        <p><strong>Path:</strong> {{ .Request.Path }}</p>
+        <p><strong>Method:</strong> {{ .Request.Method }}</p>
+    </div>
+
+    <!-- Container for request and response payloads side by side -->
+    <div class="container">
+        <!-- Left side: Add Request Payload -->
+        <div class="section">
+            <h3>Add Request Payload</h3>
+            <form id="requestPayloadForm" action="/projects/{{.Project.ID }}/requests/{{.Request.ID}}/pair/add"
+                method="POST">
+                <div class="form-group">
+                    <label for="reqContentType">Request Content Type:</label>
+                    <select id="reqContentType" name="content_type" required>
+                        <option value="application/json">application/json</option>
+                        <option value="text/html">text/html</option>
+                        <option value="text/plain">text/plain</option>
+                        <!-- Add more content types as needed -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reqPayload">Payload:</label>
+                    <textarea id="reqPayload" name="payload" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="respContentType">Response Content Type:</label>
+                    <select id="respContentType" name="resp_content_type" required>
+                        <option value="application/json">application/json</option>
+                        <option value="text/html">text/html</option>
+                        <option value="text/plain">text/plain</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="respPayload">Response Payload:</label>
+                    <textarea id="respPayload" name="resp_payload" required></textarea>
+                </div>
+                <button type="submit">Add Pair</button>
+            </form>
+        </div>
+
+        <!-- Right side: Add Response Payload -->
+    </div>
+
+    <!-- Table to list existing request payloads and response payloads -->
+    <div class="section">
+        <div class="payload-table-container">
+            <table class="payload-table">
+                <thead>
+                    <tr>
+                        <th>Request Path</th>
+                        <th>Method</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Pairs }}
+                    <tr>
+                        <td>{{ .RequestPath }}</td>
+                        <td>{{ .RequestMethod }}</td>
+                        <td>
+                            <button class="payload-button expandable" onclick="toggleDetails(this)">View
+                                Details</button>
+                            <form
+                                action="/projects/{{$.Project.ID }}/requests/{{$.Request.ID}}/pair/{{.RequestPayloadId}}/delete"
+                                method="POST" style="display:inline;">
+                                <button class="delete-button" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr class="payload-details">
+                        <td colspan="3">
+                            <strong>Request Payload:</strong>
+                            <pre>{{ .RequestPayload }}</pre>
+                            <strong>Response Payload:</strong>
+                            <pre>{{ .ResponsePayload }}</pre>
+                        </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="3">No payload pairs found.</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function toggleDetails(button) {
+            const detailsRow = button.closest('tr').nextElementSibling;
+            if (detailsRow.style.display === 'table-row') {
+                detailsRow.style.display = 'none';
+            } else {
+                detailsRow.style.display = 'table-row';
+            }
+        }
+    </script>
+
+
+</body>
+
+</html>

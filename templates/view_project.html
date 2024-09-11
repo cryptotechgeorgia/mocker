@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests and Payloads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            width: 45%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        textarea,
+        input,
+        select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Manage Requests and Payloads</h1>
+
+    <!-- Section to list all existing requests -->
+    <div class="section">
+        <h3>Existing Requests</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Path</th>
+                    <th>Method</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Requests }}
+                <tr>
+                    <td>{{ .Path }}</td>
+                    <td>{{ .Method }}</td>
+                    <td>
+                        <form action="/projects/{{ $.Project.ID }}/requests/{{ .ID }}/delete" method="POST"
+                            style="display:inline;">
+                            <button type="submit">Delete</button>
+                        </form>
+                        <a href="/projects/{{ $.Project.ID }}/requests/{{ .ID }}">View Details</a>
+                    </td>
+                </tr>
+                {{ else }}
+                <tr>
+                    <td colspan="3">No requests found.</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Container for adding new request and payloads side by side -->
+    <div class="container">
+
+        <!-- Left side: Add Request -->
+        <div class="section">
+            <h3>Add Request</h3>
+            <form id="requestForm" action="/projects/{{ .Project.ID }}/requests/add" method="POST">
+                <div class="form-group">
+                    <label for="requestPath">Request Path:</label>
+                    <input type="text" id="requestPath" name="path" required>
+                </div>
+                <div class="form-group">
+                    <label for="requestMethod">Request Method:</label>
+                    <select id="requestMethod" name="method" required>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <button type="submit">Add Request</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
