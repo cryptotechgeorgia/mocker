@@ -9,12 +9,12 @@ import (
 var (
 	DefaultResponse ResponseData = ResponseData{
 		ContentType: "application/json",
-		Payload:     `{"error":"no match"}`,
+		Payload:     `{"error": {"UserMsg":"route you're looking for does not exist for this project","Description":"","Base":"" }`,
 	}
 
 	DefaultNoRouteResponse ResponseData = ResponseData{
 		ContentType: "application/json",
-		Payload:     `{"error":"Oops! The route you're looking for does not exist."}`,
+		Payload:     `{"error": {"UserMsg":"oops! the route you're looking for does not exist.","Description":"","Base":"" }`,
 	}
 )
 

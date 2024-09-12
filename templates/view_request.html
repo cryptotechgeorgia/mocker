@@ -5,147 +5,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Details</title>
+    <!-- Include Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-html.min.js"></script>
+    <link href="./static/styles.css" rel="stylesheet">
+
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1,
+        h3 {
+            color: #333;
         }
 
         .container {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .section {
-            width: 45%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1 1 calc(50% - 20px);
             margin-bottom: 20px;
-        }
-
-        textarea,
-        input,
-        select {
-            width: 100%;
-            margin-bottom: 10px;
         }
 
         .form-group {
             margin-bottom: 15px;
         }
 
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            font-family: monospace;
+        }
+
         button {
-            padding: 10px 15px;
-            background-color: #007BFF;
+            padding: 10px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         button:hover {
             background-color: #0056b3;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .payload-table-container {
-            margin-bottom: 20px;
-        }
-
-        .payload-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .payload-table th,
-        .payload-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .payload-table th {
-            background-color: #f2f2f2;
-        }
-
-        .expandable {
-            cursor: pointer;
-        }
-
-        .payload-details {
-            display: none;
-        }
-
-        .payload-button {
-            padding: 8px 12px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .payload-button:hover {
-            background-color: #0056b3;
-        }
-
         .delete-button {
-            padding: 8px 12px;
-            background-color: #FF0000;
-            color: white;
-            border: none;
-            cursor: pointer;
+            background-color: #ff0000;
         }
 
         .delete-button:hover {
             background-color: #cc0000;
         }
 
-        /* .pair {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #f1f1f1;
-        }
-
-        .pair h4 {
-            margin: 0;
-            cursor: pointer;
-        }
-
-        .details {
-            display: none;
-            padding-top: 10px;
-        }
-
-        .details textarea {
+        table {
             width: 100%;
-            height: 100px;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
             border: 1px solid #ddd;
-            padding: 10px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
 
         .expandable {
             cursor: pointer;
-        } */
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .expandable:hover {
+            background-color: #0056b3;
+        }
+
+        .payload-details {
+            display: none;
+        }
+
+        /* Style for syntax highlighting */
+        .prism-container {
+            max-height: 200px;
+            overflow: auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* Button for applying projects */
+        .apply-projects-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .apply-projects-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .section {
+                flex: 1 1 100%;
+            }
+
+            .apply-projects-btn {
+                right: 10px;
+                top: 10px;
+                padding: 8px 16px;
+            }
+        }
     </style>
 </head>
 
@@ -153,14 +172,19 @@
 
     <h1>Request Details</h1>
 
+    <!-- Apply Projects Button -->
+    <form action="/projects/apply" method="POST" style="position: relative;">
+        <button type="submit" class="apply-projects-btn">Apply Changes</button>
+    </form>
+
     <!-- Display request details -->
     <div class="section">
-        <h3>Request Details</h3>
+        <h3>Request Information</h3>
         <p><strong>Path:</strong> {{ .Request.Path }}</p>
         <p><strong>Method:</strong> {{ .Request.Method }}</p>
     </div>
 
-    <!-- Container for request and response payloads side by side -->
+    <!-- Container for request and response payloads -->
     <div class="container">
         <!-- Left side: Add Request Payload -->
         <div class="section">
@@ -173,11 +197,10 @@
                         <option value="application/json">application/json</option>
                         <option value="text/html">text/html</option>
                         <option value="text/plain">text/plain</option>
-                        <!-- Add more content types as needed -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="reqPayload">Payload:</label>
+                    <label for="reqPayload">Request Payload:</label>
                     <textarea id="reqPayload" name="payload" required></textarea>
                 </div>
                 <div class="form-group">
@@ -195,53 +218,56 @@
                 <button type="submit">Add Pair</button>
             </form>
         </div>
-
-        <!-- Right side: Add Response Payload -->
     </div>
 
-    <!-- Table to list existing request payloads and response payloads -->
+    <!-- Table to list existing request and response payloads -->
     <div class="section">
-        <div class="payload-table-container">
-            <table class="payload-table">
-                <thead>
-                    <tr>
-                        <th>Request Path</th>
-                        <th>Method</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{ range .Pairs }}
-                    <tr>
-                        <td>{{ .RequestPath }}</td>
-                        <td>{{ .RequestMethod }}</td>
-                        <td>
-                            <button class="payload-button expandable" onclick="toggleDetails(this)">View
-                                Details</button>
-                            <form
-                                action="/projects/{{$.Project.ID }}/requests/{{$.Request.ID}}/pair/{{.RequestPayloadId}}/delete"
-                                method="POST" style="display:inline;">
-                                <button class="delete-button" type="submit">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    <tr class="payload-details">
-                        <td colspan="3">
+        <h3>Request Payloads and Responses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request Path</th>
+                    <th>Method</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Pairs }}
+                <tr>
+                    <td>{{ .RequestPath }}</td>
+                    <td>{{ .RequestMethod }}</td>
+                    <td>
+                        <button class="expandable" onclick="toggleDetails(this)">View Details</button>
+                        <form
+                            action="/projects/{{$.Project.ID }}/requests/{{$.Request.ID}}/pair/{{.RequestPayloadId}}/delete"
+                            method="POST" style="display:inline;">
+                            <button class="delete-button" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr class="payload-details">
+                    <td colspan="3">
+                        <div>
                             <strong>Request Payload:</strong>
-                            <pre>{{ .RequestPayload }}</pre>
+                            <div class="prism-container">
+                                <pre><code class="language-json">{{ .RequestPayload }}</code></pre>
+                            </div>
                             <strong>Response Payload:</strong>
-                            <pre>{{ .ResponsePayload }}</pre>
-                        </td>
-                    </tr>
-                    {{ else }}
-                    <tr>
-                        <td colspan="3">No payload pairs found.</td>
-                    </tr>
-                    {{ end }}
-                </tbody>
-            </table>
-        </div>
+                            <div class="prism-container">
+                                <pre><code class="language-json">{{ .ResponsePayload }}</code></pre>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {{ else }}
+                <tr>
+                    <td colspan="3" style="text-align:center;">No payload pairs found.</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
     </div>
+
     <script>
         function toggleDetails(button) {
             const detailsRow = button.closest('tr').nextElementSibling;
@@ -252,7 +278,6 @@
             }
         }
     </script>
-
 
 </body>
 

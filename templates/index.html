@@ -5,42 +5,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .left-section {
+            flex: 1;
+            margin-right: 20px;
+
+        }
+
+        .right-section {
+            flex: 0 0 auto;
+            text-align: right;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ul li strong {
+            font-size: 16px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .empty-message {
+            font-style: italic;
+            color: #999;
+        }
+
+        /* Apply Projects button */
+        .apply-projects-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .apply-projects-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left-section {
+                margin-right: 0;
+            }
+
+            .apply-projects-btn {
+                right: 10px;
+                top: 10px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <h1>Projects</h1>
 
-    <!-- Form to Add New Project -->
-    <form action="/projects" method="POST">
-        <label for="name">Project Name:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="base_addr">Base Address:</label>
-        <input type="text" id="base_addr" name="base_addr" required>
-        <button type="submit">Add Project</button>
+    <!-- Apply Projects Button -->
+    <form action="/projects/apply" method="POST" style="position: relative;">
+        <button type="submit" class="apply-projects-btn">Apply Changes</button>
     </form>
 
-    <form id="applyForm" action="/projects/apply" method="POST">
-        <button type="submit">Apply Projects</button>
-    </form>
+    <div class="container">
+        <div class="left-section">
+            <h2>Manage Projects</h2>
 
-    <!-- List of Projects -->
+            <!-- Form to Add New Project -->
+            <form action="/projects" method="POST">
+                <label for="name">Project Name:</label>
+                <input type="text" id="name" name="name" required placeholder="Enter project name">
 
-    <!-- List of Projects -->
-    <h2>Project List</h2>
-    <ul>
-        {{ range .Projects }}
-        <li>
-            <strong>{{ .Name }}</strong> ({{ .BaseAddr }})
-            <!-- Add View Button to Link to Project's Details -->
-            <a href="/projects/{{ .ID }}">View</a>
-            <!-- Optionally add a Delete button -->
-            <a href="/projects/delete/{{ .ID }}">Delete</a>
-        </li>
-        {{ else }}
-        <p>No projects available. Add a new project!</p>
-        {{ end }}
-    </ul>
+                <label for="base_addr">Base Address:</label>
+                <input type="text" id="base_addr" name="base_addr" required placeholder="Enter base address">
+
+                <button type="submit">Add Project</button>
+            </form>
+
+            <!-- List of Projects -->
+            <h3>Project List</h3>
+            <ul>
+                {{ range .Projects }}
+                <li>
+                    <div>
+                        <strong>{{ .Name }}</strong> ({{ .BaseAddr }})
+                    </div>
+                    <div>
+                        <a href="/projects/{{ .ID }}">View</a>
+                        <a href="/projects/delete/{{ .ID }}">Delete</a>
+                    </div>
+                </li>
+                {{ else }}
+                <p class="empty-message">No projects available. Add a new project!</p>
+                {{ end }}
+            </ul>
+        </div>
+    </div>
 </body>
 
 </html>

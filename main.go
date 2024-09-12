@@ -64,6 +64,7 @@ func main() {
 	db.MustExec(schema)
 
 	applyRouterChan := make(chan struct{})
+	doneApplyChan := make(chan struct{})
 	projStorer := projstorer.NewRepo(db)
 	projBus := project.NewBusiness(projStorer)
 
@@ -73,14 +74,14 @@ func main() {
 	payloadStorer := payloadstorer.NewRepo(db)
 	payloadBus := payload.NewBusiness(payloadStorer)
 
-	projectHandler := controllers.NewProjectHandler(projBus, reqBus, applyRouterChan, templateFS)
+	projectHandler := controllers.NewProjectHandler(projBus, reqBus, applyRouterChan, doneApplyChan, templateFS)
 	respStorer := respstorer.NewRepo(db)
-
 	respBus := response.NewBusiness(respStorer)
 	requestHandler := controllers.NewRuesthandler(reqBus, respBus, projBus, payloadBus, templateFS)
 
 	webMux := mux.NewRouter()
 	// project
+
 	webMux.HandleFunc("/", projectHandler.ListProjects).Methods("GET")
 	webMux.HandleFunc("/projects", projectHandler.AddProject).Methods("POST")
 	webMux.HandleFunc("/projects/{id}", projectHandler.ViewProject).Methods("GET")
@@ -90,7 +91,7 @@ func main() {
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}", requestHandler.ViewRequest).Methods("GET")
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}/pair/add", requestHandler.AddPair).Methods("POST")
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}/pair/{pairId}/delete", requestHandler.RemovePair).Methods("POST")
-	webMux.HandleFunc("/projects/apply", projectHandler.ApplyProjects).Methods("POST")
+	webMux.HandleFunc("/projects/apply", projectHandler.ApplyChanges).Methods("POST")
 
 	// router.router.HandleFunc("/projects/{id}/delete")
 
@@ -100,7 +101,7 @@ func main() {
 
 	// router building
 
-	mainRouter := router.NewMainRouter(
+	mockerRouter := router.NewMockerRouter(
 		applyRouterChan,
 		projBus,
 		reqBus,
@@ -112,7 +113,7 @@ func main() {
 
 	// apply projects on start
 
-	go mainRouter.Listen(context.Background(), ch)
+	go mockerRouter.Listen(context.Background(), ch, doneApplyChan)
 
 	applyRouterChan <- struct{}{}
 

@@ -5,41 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Requests and Payloads</title>
+    <link href="./static/styles.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1,
+        h3 {
+            color: #333;
         }
 
         .container {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .section {
-            width: 45%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            flex: 1 1 calc(50% - 20px);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
-        textarea,
-        input,
-        select {
+        .section h3 {
+            margin-top: 0;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
             width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .form-group {
+            padding: 10px;
             margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
 
         button {
-            padding: 10px 15px;
-            background-color: #007BFF;
+            padding: 10px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         button:hover {
@@ -49,17 +69,71 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 15px;
         }
 
         th,
         td {
-            padding: 10px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
         }
 
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #fff;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Style for Apply Projects button */
+        .apply-projects-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .apply-projects-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .section {
+                flex: 1 1 100%;
+            }
+
+            .apply-projects-btn {
+                right: 10px;
+                top: 10px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -67,6 +141,11 @@
 <body>
 
     <h1>Manage Requests and Payloads</h1>
+
+    <!-- Apply Projects Button -->
+    <form action="/projects/apply" method="POST" style="position: relative;">
+        <button type="submit" class="apply-projects-btn">Apply Changes</button>
+    </form>
 
     <!-- Section to list all existing requests -->
     <div class="section">
@@ -94,23 +173,22 @@
                 </tr>
                 {{ else }}
                 <tr>
-                    <td colspan="3">No requests found.</td>
+                    <td colspan="3" style="text-align:center;">No requests found.</td>
                 </tr>
                 {{ end }}
             </tbody>
         </table>
     </div>
 
-    <!-- Container for adding new request and payloads side by side -->
+    <!-- Container for adding new requests and payloads -->
     <div class="container">
-
         <!-- Left side: Add Request -->
         <div class="section">
-            <h3>Add Request</h3>
+            <h3>Add New Request</h3>
             <form id="requestForm" action="/projects/{{ .Project.ID }}/requests/add" method="POST">
                 <div class="form-group">
                     <label for="requestPath">Request Path:</label>
-                    <input type="text" id="requestPath" name="path" required>
+                    <input type="text" id="requestPath" name="path" placeholder="Enter request path" required>
                 </div>
                 <div class="form-group">
                     <label for="requestMethod">Request Method:</label>
@@ -124,6 +202,7 @@
                 <button type="submit">Add Request</button>
             </form>
         </div>
+
     </div>
 
 </body>

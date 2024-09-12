@@ -14,18 +14,20 @@ import (
 )
 
 type ProjectHandler struct {
-	bus       *project.Bussiness
-	reqBus    *request.Bussiness
-	applyChan chan struct{}
-	tmpl      embed.FS
+	bus           *project.Bussiness
+	reqBus        *request.Bussiness
+	applyChan     chan struct{}
+	doneApplyChan chan struct{}
+	tmpl          embed.FS
 }
 
-func NewProjectHandler(bus *project.Bussiness, req *request.Bussiness, applyChan chan struct{}, tmpl embed.FS) ProjectHandler {
+func NewProjectHandler(bus *project.Bussiness, req *request.Bussiness, applyChan chan struct{}, doneApplyChan chan struct{}, tmpl embed.FS) ProjectHandler {
 	return ProjectHandler{
-		bus:       bus,
-		reqBus:    req,
-		applyChan: applyChan,
-		tmpl:      tmpl,
+		bus:           bus,
+		reqBus:        req,
+		applyChan:     applyChan,
+		doneApplyChan: doneApplyChan,
+		tmpl:          tmpl,
 	}
 }
 
@@ -120,10 +122,12 @@ func (p *ProjectHandler) ViewProject(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, data)
 }
-func (p *ProjectHandler) ApplyProjects(w http.ResponseWriter, r *http.Request) {
+func (p *ProjectHandler) ApplyChanges(w http.ResponseWriter, r *http.Request) {
 	// signaling
 	p.applyChan <- struct{}{}
-	return
+
+	w.Write([]byte("<h1>Applied </h1>"))
+
 }
 
 // func NewProjectHandler() handlers.Hand

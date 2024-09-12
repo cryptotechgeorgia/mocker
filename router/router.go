@@ -20,12 +20,11 @@ import (
 // apply  chan activates project
 // `*` for  activating all
 
-type MainRouter struct {
-	projBus    *project.Bussiness
-	payloadBus *payload.Bussiness
-	respBus    *response.Bussiness
-	reqBus     *request.Bussiness
-
+type MockerRouter struct {
+	projBus       *project.Bussiness
+	payloadBus    *payload.Bussiness
+	respBus       *response.Bussiness
+	reqBus        *request.Bussiness
 	projects      []Project
 	applyProjects chan struct{}
 	router        *mux.Router
@@ -44,15 +43,15 @@ func normalizeJson(inp []byte) (string, error) {
 	return string(normalizedJson), nil
 }
 
-func NewMainRouter(
+func NewMockerRouter(
 	applyChan chan struct{},
 	projbus *project.Bussiness,
 	reqbus *request.Bussiness,
 	respbus *response.Bussiness,
 	paybus *payload.Bussiness,
 	router *mux.Router,
-) MainRouter {
-	return MainRouter{
+) MockerRouter {
+	return MockerRouter{
 		applyProjects: applyChan,
 		projBus:       projbus,
 		reqBus:        reqbus,
@@ -62,9 +61,8 @@ func NewMainRouter(
 	}
 }
 
-func (m *MainRouter) Listen(ctx context.Context, errChan chan error) {
+func (m *MockerRouter) Listen(ctx context.Context, errChan chan error, doneApply chan struct{}) {
 	for {
-
 		<-m.applyProjects
 
 		projects, err := m.projBus.All(ctx)
@@ -120,9 +118,7 @@ func (m *MainRouter) Listen(ctx context.Context, errChan chan error) {
 							},
 						})
 				}
-
 				proj.AddRequest(req)
-
 			}
 			activateProjects = append(activateProjects, proj)
 
@@ -173,31 +169,28 @@ func (m *MainRouter) Listen(ctx context.Context, errChan chan error) {
 						res, err := gojsonschema.Validate(schemaLoader, requestLoader)
 						if err != nil {
 							log.Println("error while validating ", err.Error())
-							resp.Header().Set("Content-Type", projectReq.defaultResp.ContentType)
-							fmt.Fprint(resp, projectReq.defaultResp.Payload)
+							continue
 						}
 
-						if res.Valid() {
-							// setting response content-type
-							resp.Header().Set("Content-Type", pair.resp.ContentType)
+						if err == nil {
+							if res.Valid() {
+								fmt.Println("valid ")
+								// setting response content-type
+								resp.Header().Set("Content-Type", pair.resp.ContentType)
 
-							// check incoming request content-type  on  project inside  one
-							if req.Header.Get("Content-Type") != pair.req.ContentType {
-								// setting request specific default  contentType
-								resp.Header().Set("Content-Type", projectReq.defaultResp.ContentType)
-								fmt.Println("content type does not matched")
-								fmt.Fprint(resp, projectReq.defaultResp.Payload)
+								// check incoming request content-type  on  project inside  one
+								if req.Header.Get("Content-Type") != pair.req.ContentType {
+									// setting request specific default  contentType
+									resp.Header().Set("Content-Type", projectReq.defaultResp.ContentType)
+									fmt.Println("content type does not matched")
+									fmt.Fprint(resp, projectReq.defaultResp.Payload)
+									return
+								}
+
+								fmt.Fprint(resp, pair.resp.Payload)
 								return
 							}
 
-							fmt.Fprint(resp, pair.resp.Payload)
-							return
-						}
-
-						if !res.Valid() {
-							for _, desc := range res.Errors() {
-								log.Printf("shema errors: - %s\n", desc)
-							}
 						}
 
 					}
@@ -212,8 +205,8 @@ func (m *MainRouter) Listen(ctx context.Context, errChan chan error) {
 			}
 		}
 	}
-}
 
+}
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", DefaultNoRouteResponse.ContentType)

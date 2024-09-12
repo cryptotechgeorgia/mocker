@@ -134,11 +134,13 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 		}
 
 		pair := PayloadPair{
-			RequestPath:      reqInfo.Path,
-			RequestMethod:    reqInfo.Method,
-			RequestPayload:   p.Payload,
-			RequestPayloadId: p.ID,
-			ResponsePayload:  resp[0].Payload,
+			RequestPath:         reqInfo.Path,
+			RequestMethod:       reqInfo.Method,
+			RequestPayload:      p.Payload,
+			RequestPayloadId:    p.ID,
+			ResponsePayload:     resp[0].Payload,
+			RequestContentType:  p.ContentType,
+			ResponseContentType: resp[0].ContentType,
 		}
 
 		fmt.Printf("pair is %+v\n", pair)
@@ -170,11 +172,13 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 }
 
 type PayloadPair struct {
-	RequestPath      string
-	RequestMethod    string
-	RequestPayload   string
-	ResponsePayload  string
-	RequestPayloadId int
+	RequestPath         string
+	RequestMethod       string
+	RequestContentType  string
+	ResponseContentType string
+	RequestPayload      string
+	ResponsePayload     string
+	RequestPayloadId    int
 }
 
 func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
