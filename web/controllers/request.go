@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -84,15 +85,12 @@ func (r *RequestHandler) AddRequest(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
-
 	vars := mux.Vars(req)
 	projId, _ := vars["id"]
 	reqId, _ := vars["reqId"]
 
 	projIdInt, _ := strconv.Atoi(projId)
 	reqIdInt, _ := strconv.Atoi(reqId)
-
-	fmt.Println(projIdInt, reqIdInt)
 
 	projInfo, err := r.projBus.Get(req.Context(), projIdInt)
 	if err != nil {
@@ -101,16 +99,12 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Printf("proj info is %+v\n", projInfo)
-
 	reqInfo, err := r.bus.Get(req.Context(), reqIdInt)
 	if err != nil {
 		fmt.Printf("errror:  %s\n", err.Error())
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Printf("req info is %+v\n", reqInfo)
 
 	reqPayloads, err := r.payloadBus.Filter(req.Context(), payload.FilterBy{
 		RequestId: convert.ToIntPtr(reqInfo.ID),
@@ -143,14 +137,8 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 			ResponseContentType: resp[0].ContentType,
 		}
 
-		fmt.Printf("pair is %+v\n", pair)
-
 		pairs = append(pairs, pair)
 	}
-
-	fmt.Printf("req info is %+v\n", reqInfo)
-
-	fmt.Println("pairs are len(pairs)=", len(pairs))
 
 	tmpl, err := template.ParseFS(r.tmpl, "templates/view_request.html")
 	if err != nil {
@@ -194,6 +182,24 @@ func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 
 	reqContentType := req.FormValue("content_type")
 	reqPayload := req.FormValue("payload")
+	respContentType := req.FormValue("resp_content_type")
+	respPayload := req.FormValue("resp_payload")
+
+	if reqContentType == "application/json" {
+		var temp map[string]interface{}
+		if err := json.Unmarshal([]byte(reqPayload), &temp); err != nil {
+			http.Error(w, "Invalid request JSON", http.StatusBadRequest)
+			return
+		}
+	}
+
+	if respContentType == "application/json" {
+		var temp map[string]interface{}
+		if err := json.Unmarshal([]byte(respPayload), &temp); err != nil {
+			http.Error(w, "Invalid  response JSON", http.StatusBadRequest)
+			return
+		}
+	}
 
 	payloadId, err := r.payloadBus.Add(req.Context(), payload.Payload{
 		Payload:     reqPayload,
@@ -205,9 +211,6 @@ func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	respContentType := req.FormValue("resp_content_type")
-	respPayload := req.FormValue("resp_payload")
-
 	if err := r.respBus.Add(req.Context(), response.Response{
 		Payload:          respPayload,
 		ContentType:      respContentType,
@@ -217,7 +220,7 @@ func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, fmt.Sprintf("/projects/%s", vars["id"]), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/projects/%s/requests/%s", vars["id"], vars["reqId"]), http.StatusSeeOther)
 }
 
 func (r *RequestHandler) RemovePair(w http.ResponseWriter, req *http.Request) {
@@ -250,9 +253,4 @@ func (r *RequestHandler) RemovePair(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(reqId)
 	http.Redirect(w, req, fmt.Sprintf("/projects/%s/requests/%s", vars["id"], vars["reqId"]), http.StatusSeeOther)
 
-	// http.Redirect(w, req, fmt.Sprintf("/projects/{%s}/requests/{%d}", vars["id"], reqId), http.StatusSeeOther)
 }
-
-// func (R *RequestHandler) FappPair()
-
-// func (r *RequestHandler) AddBu

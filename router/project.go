@@ -1,11 +1,5 @@
 package router
 
-import (
-	"fmt"
-
-	"github.com/google/uuid"
-)
-
 var (
 	DefaultResponse ResponseData = ResponseData{
 		ContentType: "application/json",
@@ -56,8 +50,6 @@ func NewPayloadPair(req RequestData, resp ResponseData) PayloadPair {
 	}
 }
 
-// func (p PayloadPair) HandlerFunc()
-
 type Request struct {
 	method       string
 	path         string
@@ -78,42 +70,8 @@ func NewRequest(method, path string) *Request {
 	}
 }
 
-func (r *Request) ChangeDefaultResponse(resp ResponseData) {
-	r.defaultResp = &resp
-}
-
-func (r *Request) AddPayloadPair(pair PayloadPair) {
-	r.payloadPairs = append(r.payloadPairs, pair)
-}
-
 type Project struct {
-	ID       uuid.UUID
 	Name     string
 	BaseAddr string
-	Requests []*Request
-}
-
-func (p *Project) AddRequest(req *Request) {
-	p.Requests = append(p.Requests, req)
-}
-
-func NewProject(name string, addr string) *Project {
-	return &Project{
-		ID:       uuid.New(),
-		Name:     name,
-		BaseAddr: addr,
-		Requests: []*Request{},
-	}
-}
-
-func (p *Project) GetRoutes() map[string]*Request {
-	router := map[string]*Request{}
-	// building  project router
-	// route protocol is "method:addr/path"
-	for _, r := range p.Requests {
-		route := fmt.Sprintf("%s/%s", p.BaseAddr, r.path)
-		router[route] = r
-	}
-
-	return router
+	Requests []Request
 }

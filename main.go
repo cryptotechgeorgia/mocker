@@ -16,9 +16,9 @@ import (
 	"github.com/cryptotechgeorgia/mocker/response"
 	respstorer "github.com/cryptotechgeorgia/mocker/response/store"
 	"github.com/cryptotechgeorgia/mocker/router"
+	"github.com/gorilla/mux"
 
 	"github.com/cryptotechgeorgia/mocker/web/controllers"
-	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -28,7 +28,7 @@ var templateFS embed.FS
 
 func main() {
 	// Initialize DB
-	db, err := sqlx.Open("sqlite3", "./test.db")
+	db, err := sqlx.Open("sqlite3", "./data/mocker.db")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -63,8 +63,6 @@ func main() {
 
 	db.MustExec(schema)
 
-	applyRouterChan := make(chan struct{})
-	doneApplyChan := make(chan struct{})
 	projStorer := projstorer.NewRepo(db)
 	projBus := project.NewBusiness(projStorer)
 
@@ -74,13 +72,15 @@ func main() {
 	payloadStorer := payloadstorer.NewRepo(db)
 	payloadBus := payload.NewBusiness(payloadStorer)
 
-	projectHandler := controllers.NewProjectHandler(projBus, reqBus, applyRouterChan, doneApplyChan, templateFS)
+	applyRouterChan := make(chan struct{}, 1)
+	errChan := make(chan error)
+
+	projectHandler := controllers.NewProjectHandler(projBus, reqBus, applyRouterChan, templateFS)
 	respStorer := respstorer.NewRepo(db)
 	respBus := response.NewBusiness(respStorer)
 	requestHandler := controllers.NewRuesthandler(reqBus, respBus, projBus, payloadBus, templateFS)
 
 	webMux := mux.NewRouter()
-	// project
 
 	webMux.HandleFunc("/", projectHandler.ListProjects).Methods("GET")
 	webMux.HandleFunc("/projects", projectHandler.AddProject).Methods("POST")
@@ -93,33 +93,27 @@ func main() {
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}/pair/{pairId}/delete", requestHandler.RemovePair).Methods("POST")
 	webMux.HandleFunc("/projects/apply", projectHandler.ApplyChanges).Methods("POST")
 
-	// router.router.HandleFunc("/projects/{id}/delete")
-
-	go func() {
-		log.Fatal(http.ListenAndServe(":8080", webMux))
-	}()
-
-	// router building
-
+	populator := router.NewPopulator(projBus, payloadBus, respBus, reqBus)
 	mockerRouter := router.NewMockerRouter(
 		applyRouterChan,
-		projBus,
-		reqBus,
-		respBus,
-		payloadBus,
+		populator,
 		webMux,
 	)
-	ch := make(chan error)
+
+	go func() {
+		fmt.Println("Starting server on :8080")
+		if err := http.ListenAndServe(":8080", mockerRouter); err != nil {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
 
 	// apply projects on start
-
-	go mockerRouter.Listen(context.Background(), ch, doneApplyChan)
+	go mockerRouter.Listen(context.Background(), errChan)
 
 	applyRouterChan <- struct{}{}
 
-	for e := range ch {
+	for e := range errChan {
 		fmt.Printf("errors %+v", e)
 
 	}
-
 }

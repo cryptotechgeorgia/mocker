@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	cnv "github.com/cryptotechgeorgia/mocker/foundation/convert"
 	"github.com/cryptotechgeorgia/mocker/project"
@@ -14,20 +16,18 @@ import (
 )
 
 type ProjectHandler struct {
-	bus           *project.Bussiness
-	reqBus        *request.Bussiness
-	applyChan     chan struct{}
-	doneApplyChan chan struct{}
-	tmpl          embed.FS
+	bus       *project.Bussiness
+	reqBus    *request.Bussiness
+	applyChan chan struct{}
+	tmpl      embed.FS
 }
 
-func NewProjectHandler(bus *project.Bussiness, req *request.Bussiness, applyChan chan struct{}, doneApplyChan chan struct{}, tmpl embed.FS) ProjectHandler {
+func NewProjectHandler(bus *project.Bussiness, req *request.Bussiness, applyChan chan struct{}, tmpl embed.FS) ProjectHandler {
 	return ProjectHandler{
-		bus:           bus,
-		reqBus:        req,
-		applyChan:     applyChan,
-		doneApplyChan: doneApplyChan,
-		tmpl:          tmpl,
+		bus:       bus,
+		reqBus:    req,
+		applyChan: applyChan,
+		tmpl:      tmpl,
 	}
 }
 
@@ -102,8 +102,6 @@ func (p *ProjectHandler) ViewProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("")
-
 	// Load the template
 	tmpl, err := template.ParseFS(p.tmpl, "templates/view_project.html")
 	if err != nil {
@@ -124,10 +122,17 @@ func (p *ProjectHandler) ViewProject(w http.ResponseWriter, r *http.Request) {
 }
 func (p *ProjectHandler) ApplyChanges(w http.ResponseWriter, r *http.Request) {
 	// signaling
-	p.applyChan <- struct{}{}
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 
-	w.Write([]byte("<h1>Applied </h1>"))
-
+	select {
+	case p.applyChan <- struct{}{}:
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "<h1>Applied Successfully</h1>")
+	case <-ctx.Done():
+		http.Error(w, "Timeout: Failed to apply changes", http.StatusRequestTimeout)
+	}
 }
 
 // func NewProjectHandler() handlers.Hand
