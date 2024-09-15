@@ -223,6 +223,18 @@ func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, fmt.Sprintf("/projects/%s/requests/%s", vars["id"], vars["reqId"]), http.StatusSeeOther)
 }
 
+func (r *RequestHandler) RemoveRequest(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	reqId, _ := strconv.Atoi(vars["reqId"])
+	if err := r.bus.Delete(req.Context(), reqId); err != nil {
+		http.Error(w, RemovePairErr.Error(), http.StatusInternalServerError)
+		return
+
+	}
+
+	http.Redirect(w, req, fmt.Sprintf("/projects/%s", vars["id"]), http.StatusSeeOther)
+}
+
 func (r *RequestHandler) RemovePair(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	reqId, _ := strconv.Atoi(vars["reqId"])

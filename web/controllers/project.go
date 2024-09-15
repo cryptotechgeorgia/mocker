@@ -52,6 +52,22 @@ func (p *ProjectHandler) ListProjects(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, data)
 }
+
+func (p *ProjectHandler) RemoveProject(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error retreving project id  %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if err := p.bus.Delete(req.Context(), id); err != nil {
+		http.Error(w, fmt.Sprintf("Error deleting project %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, req, "/", http.StatusSeeOther)
+}
 func (p *ProjectHandler) AddProject(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -134,5 +150,3 @@ func (p *ProjectHandler) ApplyChanges(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Timeout: Failed to apply changes", http.StatusRequestTimeout)
 	}
 }
-
-// func NewProjectHandler() handlers.Hand

@@ -43,22 +43,25 @@ func main() {
 	);
 	CREATE TABLE IF NOT EXISTS request (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		project_id INTEGER,
 		path TEXT,
-		method TEXT
+		project_id INTEGER,
+		method TEXT,
+		FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE  CASCADE
 	);
 
 	CREATE TABLE IF NOT EXISTS request_payload (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		payload TEXT,
 		request_id INTEGER,
-		content_type TEXT
+		content_type TEXT,
+		FOREIGN KEY (request_id) REFERENCES request(id) ON DELETE CASCADE
 	);
 	CREATE TABLE IF NOT EXISTS response (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		payload TEXT,
 		request_payload_id INTEGER,
-		content_type TEXT
+		content_type TEXT,
+		FOREIGN KEY (request_payload_id) REFERENCES request_payload(id) ON DELETE CASCADE
 	);`
 
 	db.MustExec(schema)
@@ -85,12 +88,14 @@ func main() {
 	webMux.HandleFunc("/", projectHandler.ListProjects).Methods("GET")
 	webMux.HandleFunc("/projects", projectHandler.AddProject).Methods("POST")
 	webMux.HandleFunc("/projects/{id}", projectHandler.ViewProject).Methods("GET")
+	webMux.HandleFunc("/projects/{id}/delete", projectHandler.RemoveProject).Methods("POST")
 
 	// request
 	webMux.HandleFunc("/projects/{id}/requests/add", requestHandler.AddRequest).Methods("POST")
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}", requestHandler.ViewRequest).Methods("GET")
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}/pair/add", requestHandler.AddPair).Methods("POST")
 	webMux.HandleFunc("/projects/{id}/requests/{reqId}/pair/{pairId}/delete", requestHandler.RemovePair).Methods("POST")
+	webMux.HandleFunc("/projects/{id}/requests/{reqId}/delete", requestHandler.RemoveRequest).Methods("POST")
 	webMux.HandleFunc("/projects/apply", projectHandler.ApplyChanges).Methods("POST")
 
 	populator := router.NewPopulator(projBus, payloadBus, respBus, reqBus)

@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
     <style>
+        .section form {
+            display: inline;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -179,9 +183,13 @@
                     <div>
                         <strong>{{ .Name }}</strong> ({{ .BaseAddr }})
                     </div>
-                    <div>
+                    <div class="section">
                         <a href="/projects/{{ .ID }}">View</a>
-                        <a href="/projects/delete/{{ .ID }}">Delete</a>
+
+                        <form action="/projects/{{ .ID }}/delete" method="POST" style="display:inline;">
+                            <button class="delete-btn" type="submit">Delete</button>
+                        </form>
+
                     </div>
                 </li>
                 {{ else }}
