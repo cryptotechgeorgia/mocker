@@ -164,7 +164,9 @@
                 top: 10px;
                 padding: 8px 16px;
             }
+
         }
+
     </style>
 </head>
 
@@ -180,8 +182,10 @@
     <!-- Display request details -->
     <div class="section">
         <h3>Request Information</h3>
+        <p><strong>Project: {{ .Project.Name}}</strong></p>
         <p><strong>Path:</strong> {{ .Request.Path }}</p>
         <p><strong>Method:</strong> {{ .Request.Method }}</p>
+        <p><strong>URL:</strong> {{ .Url }}</p>
     </div>
 
     <!-- Container for request and response payloads -->

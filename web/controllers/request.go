@@ -85,6 +85,7 @@ func (r *RequestHandler) AddRequest(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
+
 	vars := mux.Vars(req)
 	projId, _ := vars["id"]
 	reqId, _ := vars["reqId"]
@@ -146,11 +147,15 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	url := fmt.Sprintf("https://%s/%s/%s", req.Host, projInfo.Name, reqInfo.Path)
+
 	data := struct {
+		Url     string
 		Project project.Project
 		Request request.Request
 		Pairs   []PayloadPair
 	}{
+		Url:     url,
 		Project: projInfo,
 		Request: reqInfo,
 		Pairs:   pairs,
