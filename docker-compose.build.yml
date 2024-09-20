@@ -1,7 +1,6 @@
-version: "3.4"
 services:
   mocker:
-    image: ${DOCKER_REGISTRY_COINET}/mocker
+    image: dcreg.coinet.ge/mocker:beta
     volumes:
       - ./data:/app/data
     environment:

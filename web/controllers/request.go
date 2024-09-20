@@ -147,7 +147,7 @@ func (r *RequestHandler) ViewRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	url := fmt.Sprintf("https://%s/%s/%s", req.Host, projInfo.Name, reqInfo.Path)
+	url := fmt.Sprintf("https://%s/%s%s", req.Host, projInfo.Name, reqInfo.Path)
 
 	data := struct {
 		Url     string
