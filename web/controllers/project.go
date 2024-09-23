@@ -103,7 +103,6 @@ func (p *ProjectHandler) ViewProject(w http.ResponseWriter, r *http.Request) {
 
 	// get project
 	proj, err := p.bus.Get(r.Context(), id)
-
 	if err != nil {
 		http.Error(w, "Invalid project ID", http.StatusBadRequest)
 		return
