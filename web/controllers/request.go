@@ -174,6 +174,10 @@ type PayloadPair struct {
 	RequestPayloadId    int
 }
 
+func (r *RequestHandler) ParseFormData(formData string) {
+
+}
+
 func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
@@ -196,6 +200,10 @@ func (r *RequestHandler) AddPair(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Invalid request JSON", http.StatusBadRequest)
 			return
 		}
+	}
+
+	if reqContentType == "multipart/form-data" {
+		//TODO:  multipart parsing here
 	}
 
 	if respContentType == "application/json" {
